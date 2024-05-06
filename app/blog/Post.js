@@ -24,7 +24,9 @@ const fetchComments = async (id) => {
 
 const fetchUserProfile = async (profileId) => {
   try {
-    const response = await axios.get(`/api/profiles/${profileId}`);
+    const response = await axios.get(
+      `http://localhost:3000/api/profiles/${profileId}`
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching user profile:", error);
@@ -34,9 +36,12 @@ const fetchUserProfile = async (profileId) => {
 
 const addComment = async (id, comment) => {
   try {
-    const response = await axios.post(`/api/posts/${id}/comments`, {
-      body: comment,
-    });
+    const response = await axios.post(
+      `http://localhost:3000/api/posts/${id}/comments`,
+      {
+        body: comment,
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error adding comment:", error);

@@ -1,10 +1,11 @@
 // Post.js
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import axios from "axios";
 
 const fetchPost = async (id) => {
   try {
-    const response = await axios.get(`https://localhost:3000/api/posts/${id}`);
+    const response = await axios.get(`/api/posts/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching post:", error);
@@ -14,9 +15,7 @@ const fetchPost = async (id) => {
 
 const fetchComments = async (id) => {
   try {
-    const response = await axios.get(
-      `https://localhost:3000/api/posts/${id}/comments`
-    );
+    const response = await axios.get(`/api/posts/${id}/comments`);
     return response.data;
   } catch (error) {
     console.error("Error fetching comments:", error);
@@ -24,12 +23,11 @@ const fetchComments = async (id) => {
   }
 };
 
-const addComment = async (id, commentData) => {
+const addComment = async (id, comment) => {
   try {
-    const response = await axios.post(
-      `https://localhost:3000/api/posts/${id}/comments`,
-      commentData
-    );
+    const response = await axios.post(`/api/posts/${id}/comments`, {
+      body: comment,
+    });
     return response.data;
   } catch (error) {
     console.error("Error adding comment:", error);
@@ -38,94 +36,63 @@ const addComment = async (id, commentData) => {
 };
 
 const Post = () => {
+  const router = useRouter();
+  const { id } = router.query;
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({ name: "", email: "", body: "" });
-  const { id } = useRouter().query;
+  const [newComment, setNewComment] = useState("");
 
   useEffect(() => {
-    if (id) {
-      const fetchPostAndComments = async () => {
-        const fetchedPost = await fetchPost(id);
+    const fetchData = async () => {
+      const fetchedPost = await fetchPost(id);
+      setPost(fetchedPost);
+      if (fetchedPost) {
         const fetchedComments = await fetchComments(id);
-        setPost(fetchedPost);
         setComments(fetchedComments);
-        setLoading(false);
-      };
+      }
+    };
 
-      fetchPostAndComments();
+    if (id) {
+      fetchData();
     }
   }, [id]);
 
-  const handleChange = (event) => {
-    setFormData({ ...formData, [event.target.name]: event.target.value });
+  const handleCommentChange = (event) => {
+    setNewComment(event.target.value);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const newComment = await addComment(id, formData);
-    if (newComment) {
-      setComments([...comments, newComment]);
-      setFormData({ name: "", email: "", body: "" });
+  const handleSubmitComment = async () => {
+    if (!newComment.trim()) return;
+    const addedComment = await addComment(id, newComment);
+    if (addedComment) {
+      setComments([...comments, addedComment]);
+      setNewComment("");
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   if (!post) {
-    return <div>Post not found</div>;
+    return <div>Loading post...</div>;
   }
 
   return (
     <div>
       <h1>{post.title}</h1>
       <p>{post.body}</p>
-      <p>By: {post.authorId}</p>
-
-      <h2>Add Comment</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name:</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label>Comment:</label>
-          <textarea name="body" value={formData.body} onChange={handleChange} />
-        </div>
-        <button type="submit">Submit</button>
-      </form>
-
       <h2>Comments</h2>
-      {comments.length > 0 ? (
-        <ul>
-          {comments.map((comment) => (
-            <li key={comment.profileId}>
-              <p>{comment.name}</p>
-              <p>{comment.email}</p>
-              <p>{comment.body}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No comments</p>
-      )}
+      <ul>
+        {comments.map((comment) => (
+          <li key={comment.id}>
+            <p>{comment.body}</p>
+            <p>By: {comment.profileId}</p>
+          </li>
+        ))}
+      </ul>
+      <textarea
+        value={newComment}
+        onChange={handleCommentChange}
+        placeholder="Add a comment..."
+      />
+      <button onClick={handleSubmitComment}>Submit</button>
     </div>
   );
 };

@@ -14,7 +14,6 @@ const Home = () => {
       try {
         const response = await axios.get(
           "https://jsonplaceholder.typicode.com/posts"
-          //"https://localhost:3000/api/posts"
         );
         const data = response.data;
         setPosts(data);
@@ -46,10 +45,7 @@ const Home = () => {
       <div class="max-w-sm rounded overflow-hidden shadow-lg">
         {filteredPosts.map((post) => (
           <div key={post.id} class="px-6 py-4">
-            {/* <Link href={`api/posts/${post.authorId}`}> */}
-            <Link
-              href={`https://jsonplaceholder.typicode.com/posts/${post.id}`}
-            >
+            <Link href={`/api/${post.id}`}>
               <id class="font-bold text-xl mb-4">{post.title}</id>
             </Link>{" "}
             <p class="text-gray-900 leading-none">By: {post.authorId}</p>
@@ -61,4 +57,3 @@ const Home = () => {
 };
 
 export default Home;
-//Uncomment the above line to use the API route once done testing

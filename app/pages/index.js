@@ -24,8 +24,8 @@ const Home = () => {
     fetchPosts();
   }, []);
 
-  const handleFilterChange = (e) => {
-    const text = e.target.value.toLowerCase();
+  const handleFilterChange = (event) => {
+    const text = event.target.value.toLowerCase();
     setFilterText(text);
     const filtered = posts.filter((post) =>
       post.title.toLowerCase().includes(text)

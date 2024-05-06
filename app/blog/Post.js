@@ -1,4 +1,3 @@
-// Post.js
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
@@ -20,6 +19,16 @@ const fetchComments = async (id) => {
   } catch (error) {
     console.error("Error fetching comments:", error);
     return [];
+  }
+};
+
+const fetchUserProfile = async (profileId) => {
+  try {
+    const response = await axios.get(`/api/profiles/${profileId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return null;
   }
 };
 
@@ -70,6 +79,24 @@ const Post = () => {
     }
   };
 
+  const fetchAndSetUserProfile = async (comment) => {
+    const userProfile = await fetchUserProfile(comment.profileId);
+    return userProfile ? { ...comment, userProfile } : comment;
+  };
+
+  useEffect(() => {
+    const fetchUserProfileForComments = async () => {
+      const commentsWithUserProfiles = await Promise.all(
+        comments.map(fetchAndSetUserProfile)
+      );
+      setComments(commentsWithUserProfiles);
+    };
+
+    if (comments.length > 0) {
+      fetchUserProfileForComments();
+    }
+  }, [comments]);
+
   if (!post) {
     return <div>Loading post...</div>;
   }
@@ -83,7 +110,12 @@ const Post = () => {
         {comments.map((comment) => (
           <li key={comment.id}>
             <p>{comment.body}</p>
-            <p>By: {comment.profileId}</p>
+            {comment.userProfile && (
+              <p>
+                By: {comment.userProfile.firstName}{" "}
+                {comment.userProfile.lastName}
+              </p>
+            )}
           </li>
         ))}
       </ul>

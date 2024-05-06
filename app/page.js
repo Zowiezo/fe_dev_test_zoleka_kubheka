@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Link from "next/link";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -13,6 +14,7 @@ const Home = () => {
       try {
         const response = await axios.get(
           "https://jsonplaceholder.typicode.com/posts"
+          //"https://localhost:3000/api/posts"
         );
         const data = response.data;
         setPosts(data);
@@ -41,15 +43,22 @@ const Home = () => {
         value={filterText}
         onChange={handleFilterChange}
       />
-      <ul>
+      <div class="max-w-sm rounded overflow-hidden shadow-lg">
         {filteredPosts.map((post) => (
-          <li key={post.id}>
-            {post.title} - {post.body}
-          </li>
+          <div key={post.id} class="px-6 py-4">
+            {/* <Link href={`api/posts/${post.id}`}> */}
+            <Link
+              href={`https://jsonplaceholder.typicode.com/posts/${post.id}`}
+            >
+              <id class="font-bold text-xl mb-4">{post.title}</id>
+            </Link>{" "}
+            <p class="text-gray-900 leading-none">By: {post.id}</p>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
 
 export default Home;
+//Uncomment the above line to use the API route once done testing
